@@ -70,3 +70,30 @@ df_trans.to_sql('fact_transactions', engine, if_exists='replace', index=False)
 df_perf.to_sql('fact_performance', engine, if_exists='replace', index=False)
 
 print("✅ Pipeline complete! Your local database bluestock_mf.db is created.")
+# ---------------------------------------------------------
+# 5. Clean Remaining Auxiliary Files
+print("\nProcessing remaining auxiliary CSV files...")
+
+aux_files = [
+    ('01_fund_master (1).csv', '01_fund_master.csv'), # Fixing the weird name!
+    ('03_aum_by_fund_house.csv', '03_aum_by_fund_house.csv'),
+    ('04_monthly_sip_inflows.csv', '04_monthly_sip_inflows.csv'),
+    ('05_category_inflows.csv', '05_category_inflows.csv'),
+    ('06_industry_folio_count.csv', '06_industry_folio_count.csv'),
+    ('09_portfolio_holdings.csv', '09_portfolio_holdings.csv'),
+    ('10_benchmark_indices.csv', '10_benchmark_indices.csv')
+]
+
+for raw_name, clean_name in aux_files:
+    try:
+        # Read the file
+        df_aux = pd.read_csv(RAW_DIR / raw_name)
+        # Clean the column names (lowercase, remove hidden spaces)
+        df_aux.columns = df_aux.columns.str.strip().str.lower()
+        # Save to the processed folder
+        df_aux.to_csv(PROCESSED_DIR / clean_name, index=False)
+        print(f"  -> Cleaned {clean_name}")
+    except FileNotFoundError:
+        print(f"  -> ⚠️ Could not find {raw_name} - skipping.")
+
+print("\n✅ All 10 CSV files are now cleaned and in the processed folder!")
